@@ -1,48 +1,46 @@
-import { Routes, Route } from 'react-router-dom'
-import { ConnectButton } from '@rainbow-me/rainbowkit'
-import { Home } from './pages/Home'
-import { Proposals } from './pages/Proposals'
-import { CreateProposal } from './pages/CreateProposal'
-import { Profile } from './pages/Profile'
-import { Navigation } from './components/Navigation'
-import { Footer } from './components/Footer'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { WagmiProvider } from 'wagmi'
+import { config } from './config/wagmi'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { Toaster } from 'react-hot-toast'
+
+// Pages
+import Home from './pages/Home'
+import DonorDashboard from './pages/DonorDashboard'
+import Governance from './pages/Governance'
+import ProposalSubmission from './pages/ProposalSubmission'
+import EthVault from './pages/EthVault'
+
+// Components
+import Navbar from './components/Navbar'
+import Footer from './components/Footer'
+import NetworkBanner from './components/NetworkBanner'
+
+const queryClient = new QueryClient()
 
 function App() {
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <h1 className="text-2xl font-bold text-gradient">
-                Valenor
-              </h1>
-              <span className="ml-2 text-sm text-gray-500">
-                Social Fund
-              </span>
-            </div>
-            <ConnectButton />
+    <WagmiProvider config={config}>
+      <QueryClientProvider client={queryClient}>
+        <Router>
+          <div className="min-h-screen bg-gray-50 flex flex-col">
+            <Navbar />
+            <NetworkBanner />
+            <main className="flex-1">
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/dashboard" element={<DonorDashboard />} />
+                <Route path="/governance" element={<Governance />} />
+                <Route path="/proposal" element={<ProposalSubmission />} />
+                <Route path="/eth-vault" element={<EthVault />} />
+              </Routes>
+            </main>
+            <Footer />
+            <Toaster position="top-right" />
           </div>
-        </div>
-      </header>
-
-      {/* Navigation */}
-      <Navigation />
-
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/proposals" element={<Proposals />} />
-          <Route path="/create-proposal" element={<CreateProposal />} />
-          <Route path="/profile" element={<Profile />} />
-        </Routes>
-      </main>
-
-      {/* Footer */}
-      <Footer />
-    </div>
+        </Router>
+      </QueryClientProvider>
+    </WagmiProvider>
   )
 }
 
