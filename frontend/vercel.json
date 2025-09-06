@@ -1,0 +1,29 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ],
+  "env": {
+    "VITE_WALLET_CONNECT_PROJECT_ID": "@wallet_connect_project_id",
+    "VITE_CONTRACT_ADDRESS": "@contract_address",
+    "VITE_API_URL": "@api_url",
+    "VITE_AI_SERVICE_URL": "@ai_service_url"
+  },
+  "functions": {
+    "app/api/**/*.js": {
+      "runtime": "nodejs18.x"
+    }
+  }
+}
