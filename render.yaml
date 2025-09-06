@@ -1,0 +1,65 @@
+services:
+  # Backend API Service
+  - type: web
+    name: valenor-backend
+    env: node
+    plan: starter
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      - key: MONGODB_URI
+        fromDatabase:
+          name: valenor-mongodb
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: valenor-redis
+          property: connectionString
+      - key: FRONTEND_URL
+        value: https://valenor-frontend.onrender.com
+      - key: AI_SERVICE_URL
+        value: https://valenor-ai-service.onrender.com
+
+  # AI Service
+  - type: web
+    name: valenor-ai-service
+    env: python
+    plan: starter
+    buildCommand: cd ai-service && pip install -r requirements.txt
+    startCommand: cd ai-service && uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: PORT
+        value: 8000
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: valenor-redis
+          property: connectionString
+
+  # Frontend (Static Site)
+  - type: web
+    name: valenor-frontend
+    env: static
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: ./frontend/dist
+    envVars:
+      - key: VITE_API_URL
+        value: https://valenor-backend.onrender.com
+      - key: VITE_AI_SERVICE_URL
+        value: https://valenor-ai-service.onrender.com
+
+databases:
+  # MongoDB Database
+  - name: valenor-mongodb
+    plan: starter
+
+  # Redis Cache
+  - name: valenor-redis
+    plan: starter
