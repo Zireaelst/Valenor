@@ -1,4 +1,6 @@
 require("@nomicfoundation/hardhat-toolbox");
+require("@nomicfoundation/hardhat-verify");
+require("dotenv").config();
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
@@ -18,16 +20,19 @@ module.exports = {
     localhost: {
       url: "http://127.0.0.1:8545"
     },
-    baseSepolia: {
-      url: "https://sepolia.base.org",
+    sepolia: {
+      url: process.env.SEPOLIA_RPC_URL || "https://sepolia.infura.io/v3/YOUR_INFURA_KEY",
       accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
-      chainId: 84532
+      chainId: 11155111
     }
   },
   etherscan: {
     apiKey: {
-      baseSepolia: process.env.BASESCAN_API_KEY || ""
+      sepolia: process.env.ETHERSCAN_API_KEY || ""
     }
+  },
+  sourcify: {
+    enabled: true
   },
   paths: {
     sources: "./contracts",
