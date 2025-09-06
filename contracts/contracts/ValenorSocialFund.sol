@@ -64,7 +64,7 @@ contract ValenorSocialFund is ReentrancyGuard, Ownable {
     event FundsDeposited(address indexed depositor, uint256 amount);
     event FundsWithdrawn(address indexed recipient, uint256 amount);
 
-    constructor() Ownable(msg.sender) {}
+    constructor() Ownable() {}
 
     /**
      * @dev Join the fund by staking minimum amount
