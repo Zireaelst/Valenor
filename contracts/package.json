@@ -1,0 +1,24 @@
+{
+  "name": "valenor-contracts",
+  "version": "1.0.0",
+  "description": "Smart contracts for Valenor - Decentralized Autonomous Social Fund",
+  "main": "index.js",
+  "scripts": {
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "deploy:sepolia": "hardhat run scripts/deploy.js --network baseSepolia",
+    "deploy:local": "hardhat run scripts/deploy.js --network localhost",
+    "node": "hardhat node",
+    "clean": "hardhat clean"
+  },
+  "keywords": ["solidity", "hardhat", "defi", "dao", "social-fund"],
+  "author": "Valenor Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "hardhat": "^2.19.0"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.0.0"
+  }
+}
