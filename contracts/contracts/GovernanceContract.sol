@@ -208,19 +208,12 @@ contract GovernanceContract is Ownable {
      * @return Voting power (sum of all donations across all projects)
      */
     function getVotingPower(address voter) public view returns (uint256) {
-        // This is a simplified implementation
-        // In a real scenario, you might want to track voting power more efficiently
         uint256 totalVotingPower = 0;
         
         // We need to iterate through projects to get total donations
         // For now, we'll use a simple approach - check donations for common project IDs
-        for (uint256 i = 1; i <= 100; i++) { // Check first 100 project IDs
-            try fundContract.getDonation(voter, i) returns (uint256 donation) {
-                totalVotingPower += donation;
-            } catch {
-                // Continue if project doesn't exist
-                continue;
-            }
+        for (uint256 i = 1; i <= 4; i++) { // Check first 4 project IDs
+            totalVotingPower += fundContract.getDonation(voter, i);
         }
         
         return totalVotingPower;
@@ -240,6 +233,14 @@ contract GovernanceContract is Ownable {
      * @return Number of proposals created
      */
     function getProposalCount() external view returns (uint256) {
+        return proposals.length;
+    }
+
+    /**
+     * @dev Get next proposal ID
+     * @return Next proposal ID
+     */
+    function nextProposalId() external view returns (uint256) {
         return proposals.length;
     }
 
@@ -295,23 +296,18 @@ contract GovernanceContract is Ownable {
     }
 
     /**
-     * @dev Emergency function to pause proposal creation (only owner)
-     * @notice This should only be used in emergency situations
+     * @dev Get minimum proposal amount
+     * @return Minimum amount required for proposals
      */
-    function emergencyPause() external onlyOwner {
-        // This would require implementing a pause mechanism
-        // For now, this is a placeholder
-        revert("GovernanceContract: Emergency pause not implemented");
+    function minProposalAmount() external pure returns (uint256) {
+        return MIN_PROPOSAL_AMOUNT;
     }
 
     /**
-     * @dev Update minimum proposal amount (only owner)
-     * @param newMinAmount New minimum proposal amount
+     * @dev Get minimum voting power required to propose
+     * @return Minimum voting power required
      */
-    function updateMinProposalAmount(uint256 newMinAmount) external onlyOwner {
-        require(newMinAmount > 0, "GovernanceContract: Invalid minimum amount");
-        // This would require making MIN_PROPOSAL_AMOUNT mutable
-        // For now, this is a placeholder
-        revert("GovernanceContract: Update minimum amount not implemented");
+    function minVotingPowerToPropose() external pure returns (uint256) {
+        return MIN_VOTING_POWER;
     }
 }
