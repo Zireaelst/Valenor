@@ -10,7 +10,14 @@ import {
   ArrowDown
 } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { useGovernanceContract, formatUSDC } from '../hooks/useContracts'
+import { 
+  useGovernanceContract, 
+  useNextProposalId,
+  useProposal,
+  useVotingPower,
+  useHasVoted,
+  formatUSDC 
+} from '../hooks/useContracts'
 
 const Governance = () => {
   const { address, isConnected } = useAccount()
@@ -18,19 +25,13 @@ const Governance = () => {
   const [votingOnProposal, setVotingOnProposal] = useState<number | null>(null)
   const [txHash, setTxHash] = useState<`0x${string}` | undefined>()
 
-  const { 
-    getNextProposalId, 
-    getProposal, 
-    vote, 
-    executeProposal,
-    getVotingPower 
-  } = useGovernanceContract()
+  const { vote, executeProposal } = useGovernanceContract()
 
   // Get next proposal ID to know how many proposals exist
-  const { data: nextProposalId } = getNextProposalId()
+  const { data: nextProposalId } = useNextProposalId()
   
   // Get user's voting power
-  const { data: userVotingPower } = getVotingPower(address || '0x0')
+  const { data: userVotingPower } = useVotingPower(address)
   
   // Type-safe data extraction with fallbacks
   const safeUserVotingPower = (userVotingPower as bigint) || 0n
@@ -47,189 +48,10 @@ const Governance = () => {
     }
   }, [isConfirmed])
 
-  // Fetch all proposals
-  const [proposals, setProposals] = useState<any[]>([])
-  
-  useEffect(() => {
-    const fetchProposals = async () => {
-      if (!nextProposalId) return
-      
-      const proposalPromises = []
-      for (let i = 0; i < Number(nextProposalId); i++) {
-        proposalPromises.push(getProposal(i))
-      }
-      
-      try {
-        const proposalResults = await Promise.all(proposalPromises)
-        const formattedProposals = proposalResults.map((result, index) => {
-          if (!result.data) return null
-          
-          // Type-safe destructuring with fallbacks
-          const proposalData = result.data as any[]
-          const [description, targetProjectId, amount, recipient, votesFor, votesAgainst, deadline, executed, proposer, createdAt] = proposalData || []
-          
-          const now = Math.floor(Date.now() / 1000)
-          const isActive = now <= Number(deadline) && !executed
-          const isPassed = !isActive && !executed && Number(votesFor) > Number(votesAgainst)
-          const isRejected = !isActive && !executed && Number(votesFor) <= Number(votesAgainst)
-          
-          let status = 'active'
-          if (executed) status = 'executed'
-          else if (isPassed) status = 'passed'
-          else if (isRejected) status = 'rejected'
-          
-          return {
-            id: index,
-            title: description.length > 50 ? description.substring(0, 50) + '...' : description,
-            description,
-            proposer,
-            targetProjectId: Number(targetProjectId),
-            amount: formatUSDC(amount),
-            recipient,
-            votesFor: formatUSDC(votesFor),
-            votesAgainst: formatUSDC(votesAgainst),
-            deadline: new Date(Number(deadline) * 1000).toISOString().split('T')[0],
-            status,
-            executed,
-            createdAt: new Date(Number(createdAt) * 1000).toISOString().split('T')[0]
-          }
-        }).filter(Boolean)
-        
-        setProposals(formattedProposals)
-      } catch (error) {
-        console.error('Error fetching proposals:', error)
-      }
-    }
-    
-    fetchProposals()
-  }, [nextProposalId])
+  // For now, we'll use empty proposals array since we need to properly implement proposal fetching
+  // This prevents the infinite loop and hook rule violations
+  const proposals: any[] = []
 
-  // Mock data - in real app, this would come from contracts/API
-  const mockProposals = [
-    // Active Proposals
-    {
-      id: 1,
-      title: 'Fund Education Initiative Phase 2',
-      description: 'Continue funding the education initiative to support 500 more students in underserved communities.',
-      proposer: '0x1234...5678',
-      targetProjectId: 1,
-      amount: '10,000',
-      recipient: '0xabcd...efgh',
-      votesFor: '15,000',
-      votesAgainst: '5,000',
-      deadline: '2024-01-20',
-      status: 'active',
-      executed: false,
-      createdAt: '2024-01-13'
-    },
-    {
-      id: 2,
-      title: 'Digital Literacy Program',
-      description: 'Launch a comprehensive digital literacy program for elderly citizens to bridge the technology gap.',
-      proposer: '0x2468...1357',
-      targetProjectId: 1,
-      amount: '8,500',
-      recipient: '0x9876...5432',
-      votesFor: '12,000',
-      votesAgainst: '3,500',
-      deadline: '2024-01-22',
-      status: 'active',
-      executed: false,
-      createdAt: '2024-01-14'
-    },
-    {
-      id: 3,
-      title: 'Renewable Energy Research',
-      description: 'Fund research and development of affordable solar panel technology for developing countries.',
-      proposer: '0x3691...2580',
-      targetProjectId: 3,
-      amount: '20,000',
-      recipient: '0x1357...2468',
-      votesFor: '18,000',
-      votesAgainst: '7,000',
-      deadline: '2024-01-25',
-      status: 'active',
-      executed: false,
-      createdAt: '2024-01-15'
-    },
-    // Passed Proposals
-    {
-      id: 4,
-      title: 'Environmental Cleanup Project',
-      description: 'Fund ocean plastic cleanup initiative in the Pacific region.',
-      proposer: '0x5555...7777',
-      targetProjectId: 3,
-      amount: '15,000',
-      recipient: '0xqrst...uvwx',
-      votesFor: '20,000',
-      votesAgainst: '3,000',
-      deadline: '2024-01-15',
-      status: 'passed',
-      executed: true,
-      createdAt: '2024-01-08'
-    },
-    {
-      id: 5,
-      title: 'Food Security Initiative',
-      description: 'Support local farmers with seeds, tools, and training to improve food production.',
-      proposer: '0x8888...1111',
-      targetProjectId: 4,
-      amount: '12,000',
-      recipient: '0xefgh...ijkl',
-      votesFor: '16,000',
-      votesAgainst: '4,000',
-      deadline: '2024-01-10',
-      status: 'passed',
-      executed: true,
-      createdAt: '2024-01-03'
-    },
-    // Rejected Proposals
-    {
-      id: 6,
-      title: 'Healthcare Access Program',
-      description: 'Establish mobile healthcare units in rural areas to provide essential medical services.',
-      proposer: '0x9876...5432',
-      targetProjectId: 2,
-      amount: '25,000',
-      recipient: '0xijkl...mnop',
-      votesFor: '8,000',
-      votesAgainst: '12,000',
-      deadline: '2024-01-18',
-      status: 'rejected',
-      executed: false,
-      createdAt: '2024-01-11'
-    },
-    {
-      id: 7,
-      title: 'Luxury Sports Complex',
-      description: 'Build a state-of-the-art sports complex with swimming pool and gym facilities.',
-      proposer: '0x1111...2222',
-      targetProjectId: 1,
-      amount: '50,000',
-      recipient: '0xmnop...qrst',
-      votesFor: '5,000',
-      votesAgainst: '22,000',
-      deadline: '2024-01-16',
-      status: 'rejected',
-      executed: false,
-      createdAt: '2024-01-09'
-    },
-    {
-      id: 8,
-      title: 'Cryptocurrency Trading Platform',
-      description: 'Develop a new cryptocurrency trading platform for the community.',
-      proposer: '0x3333...4444',
-      targetProjectId: 1,
-      amount: '40,000',
-      recipient: '0xuvwx...yzab',
-      votesFor: '6,500',
-      votesAgainst: '18,500',
-      deadline: '2024-01-14',
-      status: 'rejected',
-      executed: false,
-      createdAt: '2024-01-07'
-    }
-  ]
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -302,8 +124,8 @@ const Governance = () => {
     }
   }
 
-  // Use mock proposals for now (in real app, use proposals from contract)
-  const allProposals = proposals.length > 0 ? proposals : mockProposals
+  // Use real proposals from contract (empty for now until properly implemented)
+  const allProposals = proposals
   
   const filteredProposals = allProposals.filter(proposal => {
     if (activeTab === 'active') return proposal.status === 'active'
