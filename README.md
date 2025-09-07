@@ -21,9 +21,21 @@ A decentralized autonomous organization (DAO) that enables transparent, communit
 
 ## 📋 Contract Addresses
 
-TestUSDC deployed to: 0x5FbDB2315678afecb367f032d93F642f64180aa3
-FundContract deployed to: 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512
-GovernanceContract deployed to: 0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0
+TestUSDC deployed to: 0x249Cd8D3C907ae0565C0Fd1f335b098f5b85121A
+FundContract deployed to: 0x534d7313353445378519286b81d8B9Ff4084d0e9
+GovernanceContract deployed to: 0x49cbb6E45f8869ca48537EE162159A3b8FF1Ea86
+EthVault deployed to: 0x7cFf25AD0b8dd107dc40f985631f72a601D50ac9
+
+### Test Donations
+
+Each project received 300 USDC donation for testing purposes:
+
+- Project 1: [Transaction on Etherscan](https://sepolia.etherscan.io/tx/0xc4ec1daa3047de74dcd59e82506139ad53e6505e7aea69a47374029f46ddc1b5)
+- Project 2: [Transaction on Etherscan](https://sepolia.etherscan.io/tx/0x99aa54a89d18a1e0f33d2efb287d26c072d1cee947920174c398da67a46715b5)
+- Project 3: [Transaction on Etherscan](https://sepolia.etherscan.io/tx/0xe35813869d1b58ca6b4b037e6b16229da48162d2202d601dd230549df7e66033)
+- Project 4: [Transaction on Etherscan](https://sepolia.etherscan.io/tx/0x028a049501d7fafd3165a13a8c6120ca05990c91fee09f7beb816e20ec060c5c)
+
+Total donations: 1200 USDC (sufficient for proposal creation which requires 1000 USDC minimum)
 
 ## 📋 Prerequisiteses
 
@@ -78,7 +90,10 @@ Create `frontend/.env`:
 
 ```env
 VITE_AI_SERVICE_URL=http://localhost:8000
-VITE_ETH_VAULT_ADDRESS=0x0AD6E1db1D5d4470270a66cbEB081d23E612b3B7
+VITE_FUND_CONTRACT=0x534d7313353445378519286b81d8B9Ff4084d0e9
+VITE_GOV_CONTRACT=0x49cbb6E45f8869ca48537EE162159A3b8FF1Ea86
+VITE_USDC_ADDRESS=0x249Cd8D3C907ae0565C0Fd1f335b098f5b85121A
+VITE_ETH_VAULT_ADDRESS=0x7cFf25AD0b8dd107dc40f985631f72a601D50ac9
 ```
 
 ### Backend Environment
@@ -135,9 +150,13 @@ npx hardhat run scripts/deploy.js --network sepolia
 
 ### Sepolia Testnet
 
-- **EthVault Contract**: `0x0AD6E1db1D5d4470270a66cbEB081d23E612b3B7`
+- **TestUSDC**: `0x249Cd8D3C907ae0565C0Fd1f335b098f5b85121A`
+- **FundContract**: `0x534d7313353445378519286b81d8B9Ff4084d0e9`
+- **GovernanceContract**: `0x49cbb6E45f8869ca48537EE162159A3b8FF1Ea86`
+- **EthVault**: `0x7cFf25AD0b8dd107dc40f985631f72a601D50ac9`
 - **Network**: Sepolia Testnet
 - **Chain ID**: 11155111
+- **Test Donations**: 300 USDC to each project (1200 USDC total)
 
 ## 🎯 How to Reproduce the Demo
 
@@ -277,8 +296,6 @@ Valenor/
 ## 🔗 Links
 
 - **GitHub**: https://github.com/Zireaelst/Valenor
-- **Demo**: [Live Demo URL]
-- **Documentation**: [Documentation URL]
 
 ## 🤝 Contributing
 
