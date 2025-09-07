@@ -3,7 +3,7 @@ import { useAccount, useConnect, useDisconnect } from 'wagmi'
 import { Wallet, LogOut, Menu, X, DollarSign } from 'lucide-react'
 import { useState } from 'react'
 import toast from 'react-hot-toast'
-import { useUSDC, formatUSDC } from '../hooks/useContracts'
+import { useUSDCBalance, formatUSDC } from '../hooks/useContracts'
 import valenorLogo from '../assets/valenorlogonontext.png'
 
 const Navbar = () => {
@@ -13,8 +13,7 @@ const Navbar = () => {
   const location = useLocation()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   
-  const { balanceOf } = useUSDC()
-  const { data: usdcBalance } = balanceOf(address || '0x0')
+  const { data: usdcBalance } = useUSDCBalance(address)
 
   const handleConnect = () => {
     const connector = connectors[0] // MetaMask

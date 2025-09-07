@@ -20,7 +20,18 @@ import {
   DollarSign
 } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { useUSDC, useFundContract, formatUSDC, parseUSDC } from '../hooks/useContracts'
+import { 
+  useUSDC, 
+  useFundContract, 
+  useUSDCBalance, 
+  useUSDCAllowance,
+  useDonorTotalDonations,
+  useDonation,
+  useProjectDonations,
+  useProjectAvailable,
+  formatUSDC, 
+  parseUSDC 
+} from '../hooks/useContracts'
 import { CONTRACTS, CHAIN_ID } from '../config/contracts'
 
 // Register Chart.js components
@@ -41,37 +52,34 @@ const DonorDashboard = () => {
   const [isDonating, setIsDonating] = useState(false)
   const [txHash, setTxHash] = useState<`0x${string}` | undefined>()
 
-  const { balanceOf, allowance, approve } = useUSDC()
-  const { 
-    getDonorTotalDonations, 
-    getDonation, 
-    donate, 
-    getProjectDonations,
-    getProjectAvailable 
-  } = useFundContract()
+  const { approve } = useUSDC()
+  const { donate } = useFundContract()
 
   // Get user's USDC balance
-  const { data: usdcBalance } = balanceOf(address || '0x0')
+  const { data: usdcBalance } = useUSDCBalance(address)
+  
+  // Get USDC allowance for fund contract
+  const { data: currentAllowance } = useUSDCAllowance(address, CONTRACTS[CHAIN_ID].fundContract)
   
   // Get user's total donations (voting power)
-  const { data: totalDonations } = getDonorTotalDonations(address || '0x0')
+  const { data: totalDonations } = useDonorTotalDonations(address)
   
   // Get individual project donations for chart
-  const { data: project1Donation } = getDonation(address || '0x0', 1)
-  const { data: project2Donation } = getDonation(address || '0x0', 2)
-  const { data: project3Donation } = getDonation(address || '0x0', 3)
-  const { data: project4Donation } = getDonation(address || '0x0', 4)
+  const { data: project1Donation } = useDonation(address, 1)
+  const { data: project2Donation } = useDonation(address, 2)
+  const { data: project3Donation } = useDonation(address, 3)
+  const { data: project4Donation } = useDonation(address, 4)
 
   // Get total project donations and available funds for analytics
-  const { data: totalProject1Donations } = getProjectDonations(1)
-  const { data: totalProject2Donations } = getProjectDonations(2)
-  const { data: totalProject3Donations } = getProjectDonations(3)
-  const { data: totalProject4Donations } = getProjectDonations(4)
+  const { data: totalProject1Donations } = useProjectDonations(1)
+  const { data: totalProject2Donations } = useProjectDonations(2)
+  const { data: totalProject3Donations } = useProjectDonations(3)
+  const { data: totalProject4Donations } = useProjectDonations(4)
 
-  const { data: project1Available } = getProjectAvailable(1)
-  const { data: project2Available } = getProjectAvailable(2)
-  const { data: project3Available } = getProjectAvailable(3)
-  const { data: project4Available } = getProjectAvailable(4)
+  const { data: project1Available } = useProjectAvailable(1)
+  const { data: project2Available } = useProjectAvailable(2)
+  const { data: project3Available } = useProjectAvailable(3)
+  const { data: project4Available } = useProjectAvailable(4)
 
   // Type-safe data extraction with fallbacks
   const safeUsdcBalance = (usdcBalance as bigint) || 0n
@@ -313,7 +321,6 @@ const DonorDashboard = () => {
     setIsDonating(true)
     try {
       // First, check allowance
-      const { data: currentAllowance } = allowance(address, CONTRACTS[CHAIN_ID].fundContract)
       const safeCurrentAllowance = (currentAllowance as bigint) || 0n
       
       if (safeCurrentAllowance < donationAmountWei) {
@@ -324,9 +331,8 @@ const DonorDashboard = () => {
         
         // Wait for approval confirmation
         await new Promise((resolve, reject) => {
-          const checkApproval = setInterval(async () => {
-            const { data: newAllowance } = allowance(address, CONTRACTS[CHAIN_ID].fundContract)
-            const safeNewAllowance = (newAllowance as bigint) || 0n
+          const checkApproval = setInterval(() => {
+            const safeNewAllowance = (currentAllowance as bigint) || 0n
             if (safeNewAllowance >= donationAmountWei) {
               clearInterval(checkApproval)
               resolve(true)

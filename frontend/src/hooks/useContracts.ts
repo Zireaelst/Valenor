@@ -6,24 +6,6 @@ import { CONTRACTS, ABIS, CHAIN_ID } from '../config/contracts'
 export const useUSDC = () => {
   const { writeContract } = useWriteContract()
 
-  const balanceOf = (address: `0x${string}`) => {
-    return useReadContract({
-      address: CONTRACTS[CHAIN_ID].usdcToken,
-      abi: ABIS.TestUSDC,
-      functionName: 'balanceOf',
-      args: [address],
-    })
-  }
-
-  const allowance = (owner: `0x${string}`, spender: `0x${string}`) => {
-    return useReadContract({
-      address: CONTRACTS[CHAIN_ID].usdcToken,
-      abi: ABIS.TestUSDC,
-      functionName: 'allowance',
-      args: [owner, spender],
-    })
-  }
-
   const approve = async (spender: `0x${string}`, amount: string) => {
     const amountWei = parseUnits(amount, 6) // USDC has 6 decimals
     return writeContract({
@@ -45,52 +27,35 @@ export const useUSDC = () => {
   }
 
   return {
-    balanceOf,
-    allowance,
     approve,
     mint,
   }
 }
 
+// USDC Read Hooks
+export const useUSDCBalance = (address: `0x${string}` | undefined) => {
+  return useReadContract({
+    address: CONTRACTS[CHAIN_ID].usdcToken,
+    abi: ABIS.TestUSDC,
+    functionName: 'balanceOf',
+    args: address ? [address] : undefined,
+    enabled: !!address,
+  })
+}
+
+export const useUSDCAllowance = (owner: `0x${string}` | undefined, spender: `0x${string}` | undefined) => {
+  return useReadContract({
+    address: CONTRACTS[CHAIN_ID].usdcToken,
+    abi: ABIS.TestUSDC,
+    functionName: 'allowance',
+    args: owner && spender ? [owner, spender] : undefined,
+    enabled: !!(owner && spender),
+  })
+}
+
 // Fund Contract Hook
 export const useFundContract = () => {
   const { writeContract } = useWriteContract()
-
-  const getDonorTotalDonations = (donor: `0x${string}`) => {
-    return useReadContract({
-      address: CONTRACTS[CHAIN_ID].fundContract,
-      abi: ABIS.FundContract,
-      functionName: 'getDonorTotalDonations',
-      args: [donor],
-    })
-  }
-
-  const getProjectAvailable = (projectId: number) => {
-    return useReadContract({
-      address: CONTRACTS[CHAIN_ID].fundContract,
-      abi: ABIS.FundContract,
-      functionName: 'getProjectAvailable',
-      args: [BigInt(projectId)],
-    })
-  }
-
-  const getProjectDonations = (projectId: number) => {
-    return useReadContract({
-      address: CONTRACTS[CHAIN_ID].fundContract,
-      abi: ABIS.FundContract,
-      functionName: 'projectDonations',
-      args: [BigInt(projectId)],
-    })
-  }
-
-  const getDonation = (donor: `0x${string}`, projectId: number) => {
-    return useReadContract({
-      address: CONTRACTS[CHAIN_ID].fundContract,
-      abi: ABIS.FundContract,
-      functionName: 'donations',
-      args: [donor, BigInt(projectId)],
-    })
-  }
 
   const donate = async (amount: string, projectId: number) => {
     const amountWei = parseUnits(amount, 6)
@@ -113,69 +78,53 @@ export const useFundContract = () => {
   }
 
   return {
-    getDonorTotalDonations,
-    getProjectAvailable,
-    getProjectDonations,
-    getDonation,
     donate,
     releaseMilestone,
   }
 }
 
+// Fund Contract Read Hooks
+export const useDonorTotalDonations = (donor: `0x${string}` | undefined) => {
+  return useReadContract({
+    address: CONTRACTS[CHAIN_ID].fundContract,
+    abi: ABIS.FundContract,
+    functionName: 'getDonorTotalDonations',
+    args: donor ? [donor] : undefined,
+    enabled: !!donor,
+  })
+}
+
+export const useProjectAvailable = (projectId: number) => {
+  return useReadContract({
+    address: CONTRACTS[CHAIN_ID].fundContract,
+    abi: ABIS.FundContract,
+    functionName: 'getProjectAvailable',
+    args: [BigInt(projectId)],
+  })
+}
+
+export const useProjectDonations = (projectId: number) => {
+  return useReadContract({
+    address: CONTRACTS[CHAIN_ID].fundContract,
+    abi: ABIS.FundContract,
+    functionName: 'projectDonations',
+    args: [BigInt(projectId)],
+  })
+}
+
+export const useDonation = (donor: `0x${string}` | undefined, projectId: number) => {
+  return useReadContract({
+    address: CONTRACTS[CHAIN_ID].fundContract,
+    abi: ABIS.FundContract,
+    functionName: 'donations',
+    args: donor ? [donor, BigInt(projectId)] : undefined,
+    enabled: !!donor,
+  })
+}
+
 // Governance Contract Hook
 export const useGovernanceContract = () => {
   const { writeContract } = useWriteContract()
-
-  const getVotingPower = (voter: `0x${string}`) => {
-    return useReadContract({
-      address: CONTRACTS[CHAIN_ID].governanceContract,
-      abi: ABIS.GovernanceContract,
-      functionName: 'getVotingPower',
-      args: [voter],
-    })
-  }
-
-  const getProposal = (proposalId: number) => {
-    return useReadContract({
-      address: CONTRACTS[CHAIN_ID].governanceContract,
-      abi: ABIS.GovernanceContract,
-      functionName: 'proposals',
-      args: [BigInt(proposalId)],
-    })
-  }
-
-  const getNextProposalId = () => {
-    return useReadContract({
-      address: CONTRACTS[CHAIN_ID].governanceContract,
-      abi: ABIS.GovernanceContract,
-      functionName: 'nextProposalId',
-    })
-  }
-
-  const hasVoted = (proposalId: number, voter: `0x${string}`) => {
-    return useReadContract({
-      address: CONTRACTS[CHAIN_ID].governanceContract,
-      abi: ABIS.GovernanceContract,
-      functionName: 'hasVoted',
-      args: [BigInt(proposalId), voter],
-    })
-  }
-
-  const getMinProposalAmount = () => {
-    return useReadContract({
-      address: CONTRACTS[CHAIN_ID].governanceContract,
-      abi: ABIS.GovernanceContract,
-      functionName: 'minProposalAmount',
-    })
-  }
-
-  const getMinVotingPowerToPropose = () => {
-    return useReadContract({
-      address: CONTRACTS[CHAIN_ID].governanceContract,
-      abi: ABIS.GovernanceContract,
-      functionName: 'minVotingPowerToPropose',
-    })
-  }
 
   const createProposal = async (
     description: string,
@@ -211,16 +160,64 @@ export const useGovernanceContract = () => {
   }
 
   return {
-    getVotingPower,
-    getProposal,
-    getNextProposalId,
-    hasVoted,
-    getMinProposalAmount,
-    getMinVotingPowerToPropose,
     createProposal,
     vote,
     executeProposal,
   }
+}
+
+// Governance Contract Read Hooks
+export const useVotingPower = (voter: `0x${string}` | undefined) => {
+  return useReadContract({
+    address: CONTRACTS[CHAIN_ID].governanceContract,
+    abi: ABIS.GovernanceContract,
+    functionName: 'getVotingPower',
+    args: voter ? [voter] : undefined,
+    enabled: !!voter,
+  })
+}
+
+export const useProposal = (proposalId: number) => {
+  return useReadContract({
+    address: CONTRACTS[CHAIN_ID].governanceContract,
+    abi: ABIS.GovernanceContract,
+    functionName: 'proposals',
+    args: [BigInt(proposalId)],
+  })
+}
+
+export const useNextProposalId = () => {
+  return useReadContract({
+    address: CONTRACTS[CHAIN_ID].governanceContract,
+    abi: ABIS.GovernanceContract,
+    functionName: 'nextProposalId',
+  })
+}
+
+export const useHasVoted = (proposalId: number, voter: `0x${string}` | undefined) => {
+  return useReadContract({
+    address: CONTRACTS[CHAIN_ID].governanceContract,
+    abi: ABIS.GovernanceContract,
+    functionName: 'hasVoted',
+    args: voter ? [BigInt(proposalId), voter] : undefined,
+    enabled: !!voter,
+  })
+}
+
+export const useMinProposalAmount = () => {
+  return useReadContract({
+    address: CONTRACTS[CHAIN_ID].governanceContract,
+    abi: ABIS.GovernanceContract,
+    functionName: 'minProposalAmount',
+  })
+}
+
+export const useMinVotingPowerToPropose = () => {
+  return useReadContract({
+    address: CONTRACTS[CHAIN_ID].governanceContract,
+    abi: ABIS.GovernanceContract,
+    functionName: 'minVotingPowerToPropose',
+  })
 }
 
 // Utility function to format USDC amounts

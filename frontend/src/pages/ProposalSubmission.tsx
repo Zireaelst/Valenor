@@ -12,7 +12,15 @@ import {
   Loader
 } from 'lucide-react'
 import toast from 'react-hot-toast'
-import { useGovernanceContract, useFundContract, formatUSDC, parseUSDC } from '../hooks/useContracts'
+import { 
+  useGovernanceContract, 
+  useVotingPower,
+  useMinVotingPowerToPropose,
+  useMinProposalAmount,
+  useProjectAvailable,
+  formatUSDC, 
+  parseUSDC 
+} from '../hooks/useContracts'
 import { aiService, AIAnalysisResponse } from '../services/aiService'
 
 interface AIAnalysis {
@@ -28,21 +36,20 @@ const ProposalSubmission = () => {
   const [aiAnalysis, setAiAnalysis] = useState<AIAnalysis | null>(null)
   const [txHash, setTxHash] = useState<`0x${string}` | undefined>()
 
-  const { 
-    createProposal, 
-    getVotingPower, 
-    getMinVotingPowerToPropose,
-    getMinProposalAmount 
-  } = useGovernanceContract()
-  
-  const { getProjectAvailable } = useFundContract()
+  const { createProposal } = useGovernanceContract()
 
   // Get user's voting power
-  const { data: userVotingPower } = getVotingPower(address || '0x0')
+  const { data: userVotingPower } = useVotingPower(address)
   
   // Get minimum requirements
-  const { data: minVotingPower } = getMinVotingPowerToPropose()
-  const { data: minProposalAmount } = getMinProposalAmount()
+  const { data: minVotingPower } = useMinVotingPowerToPropose()
+  const { data: minProposalAmount } = useMinProposalAmount()
+  
+  // Get project available funds for all projects
+  const { data: project1Available } = useProjectAvailable(1)
+  const { data: project2Available } = useProjectAvailable(2)
+  const { data: project3Available } = useProjectAvailable(3)
+  const { data: project4Available } = useProjectAvailable(4)
 
   // Wait for transaction receipt
   const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
@@ -143,7 +150,26 @@ const ProposalSubmission = () => {
     }
 
     // Check if project has enough available funds
-    const { data: projectAvailable } = getProjectAvailable(parseInt(formData.projectId))
+    const projectId = parseInt(formData.projectId)
+    let projectAvailable: bigint | undefined
+    
+    switch (projectId) {
+      case 1:
+        projectAvailable = project1Available as bigint
+        break
+      case 2:
+        projectAvailable = project2Available as bigint
+        break
+      case 3:
+        projectAvailable = project3Available as bigint
+        break
+      case 4:
+        projectAvailable = project4Available as bigint
+        break
+      default:
+        projectAvailable = 0n
+    }
+    
     if (projectAvailable && projectAvailable < proposalAmountWei) {
       toast.error(`Project only has ${formatUSDC(projectAvailable)} USDC available`)
       return
